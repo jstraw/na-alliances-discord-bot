@@ -1,15 +1,18 @@
+import argparse
 import json
 import logging
 import logging.handlers
 
 import client
 
+global configs
 ### Configure Logging
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 logging.getLogger('discord.http').setLevel(logging.INFO)
 logging.getLogger('asyncio').setLevel(logging.INFO)
 logging.getLogger('aiohttp').setLevel(logging.DEBUG)
+logging.getLogger('aiosqlite').setLevel(logging.INFO)
 
 handler = logging.handlers.RotatingFileHandler(
     filename='discord.log',
@@ -25,9 +28,15 @@ handler.setFormatter(formatter)
 # logger.addHandler(handler)
 logger.addHandler(console)
 
-with open('config.json', 'r') as fd:
-    config = json.load(fd)
 
-client.client.config = config
-client.client.run(config['token'])
-logger.warning("Shutting Down")
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', default='config.json', required=False)
+    args = parser.parse_args()
+    with open(args.config, 'r') as fd:
+        config = json.load(fd)
+
+    
+    client.bot.config = config
+    client.bot.run(config['token'])
+    logger.warning("Shutting Down")
