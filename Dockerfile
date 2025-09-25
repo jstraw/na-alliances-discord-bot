@@ -1,6 +1,6 @@
 FROM python:3-trixie
 RUN apt update && apt install -y python3-poetry
-ENV POETRY_VIRTUALENVS_PATH /venvs
+ENV POETRY_VIRTUALENVS_PATH=/venvs
 WORKDIR /venvs
 VOLUME /alliancebot
 WORKDIR /alliancebot
