@@ -7,17 +7,32 @@ import aiosqlite
 import discord
 from discord.ext import tasks, commands
 import gspread
+import na_alliances_discord_bot.embed as embed
 import na_alliances_discord_bot.naspreadsheet as naspreadsheet
-import util
+import na_alliances_discord_bot.util as util
 
 
 class UpdateSheet(commands.Cog):
+    # self.db => sqlite database
+    # self.storage_channel => channel with the full data/update time
+    # self.storage_message => message id of the stored data
+    # self.current_data => message with the data (from self.storage_message)
+    # self.last_updated => timestamp of last update datetime.datetime
+    # self.json_data => actual stored data
+    # self.gspread => google spreadsheet connector
+    # self.sheet => internal interface for getting data from spreadsheet
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
         self.config = bot.config
         super().__init__()
+
+    @discord.app_commands.command(name="update_embeds")
+    async def update(self, interaction: discord.Interaction):
+        await interaction.response.send_message(f"Pushing Embeds")
+        await self.push_embeds()
         
 
+        
     async def cog_unload(self):
         self.check_for_updates.cancel()
 
@@ -159,16 +174,56 @@ class UpdateSheet(commands.Cog):
         
         # Output
         if not changelog:
+            log.warning("No Changes")
             return
         elif len(changelog) < 100:
-
-            self.storage_channel.send('\n'.join(changelog))
+            log.warning("Smallish Changes")
+            await self.storage_channel.send('\n'.join(changelog))
+            log.debug("Sent")
         else:
-            self.storage_channel.send("Large Changelog", file=io.StringIO('\n'.join(changelog)))
+            log.warning("Large Changes")
+            await self.storage_channel.send("Large Changelog", file=io.StringIO('\n'.join(changelog)))
+            log.debug("Sent")
+        await self.write_update(newdata, now)
+        self.json_data = newdata
+        self.last_updated = now
+        await self.push_embeds()
 
     @check_for_updates.before_loop
-    async def before_checK_for_updates(self):
+    async def before_check_for_updates(self):
         logging.info("Waiting to start update check")
         await self.bot.wait_until_ready()
         logging.info("Start update check")
 
+    async def push_embeds(self):
+        channels = await util.get_channels(self.bot, self.config['channels'])
+        servers = {}
+        for channel in channels:
+            for abbr, name in self.config['servers'].items():
+                msg_embed = embed.make_server_embed(self.json_data, abbr)
+                servers[abbr] = {"name": name}
+                async with self.db.execute(f"""select * from outputs where 
+                                           guild = "{channel.guild.name}" and 
+                                           channel = "{channel.name}" and
+                                           server = "{abbr}";""") as cur:
+                    rows = await cur.fetchall()
+                if not len(rows):
+                    # Setup the message
+                    message = await channel.send(f'# {name} Guild List', 
+                                            embeds=msg_embed)
+                    await self.db.execute(f"""INSERT INTO outputs 
+                                            (guild, channel, server, last_updated, storage_id)
+                                            VALUES ('{channel.guild.name}', 
+                                            '{channel.name}', 
+                                            '{abbr}',
+                                            '{self.last_updated}', 
+                                            '{message.id}');""")
+                    await self.db.commit()
+                else:
+                    logging.debug(f"row: {rows}")
+                    g, c, s, lu, mid = rows[0]
+                    message = await channel.fetch_message(mid)
+                await message.edit(content=f'# {name} Guild List', embeds=msg_embed)
+                await self.db.execute(f"""UPDATE outputs set last_updated = '{self.last_updated}' where storage_id = {mid}""")
+                await self.db.commit()
+                    

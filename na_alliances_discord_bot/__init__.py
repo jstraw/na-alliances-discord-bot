@@ -13,6 +13,7 @@ logging.getLogger('discord.http').setLevel(logging.INFO)
 logging.getLogger('asyncio').setLevel(logging.INFO)
 logging.getLogger('aiohttp').setLevel(logging.DEBUG)
 logging.getLogger('aiosqlite').setLevel(logging.INFO)
+logging.getLogger('na_alliances_discord_bot.naspreadsheet').setLevel(logging.INFO)
 
 handler = logging.handlers.RotatingFileHandler(
     filename='discord.log',

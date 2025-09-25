@@ -30,6 +30,11 @@ async def on_ready():
     bot.session = LoggingClientSession('https://worldvs.world/alliances/')
     bot.logger.info(f"Logged on as {bot.user} to {bot.guilds}")
     await bot.add_cog(UpdateSheet(bot))
+    bot.logger.warning(f"Cogs {bot.cogs}")
+    for x, y in bot.cogs.items():
+        await y.bot.tree.sync()
+    synced = await bot.tree.sync()
+    bot.logger.warning(f"Synced {synced} commands.")
 
 
 async def passedover():

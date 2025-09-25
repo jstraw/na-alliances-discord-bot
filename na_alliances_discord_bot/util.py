@@ -29,6 +29,15 @@ async def db_connection(config):
                 last_updated CHARACTER(20),
                 storage_id INTEGER unique
                 );""")
+    await db.commit()
+    await db.execute("""CREATE TABLE IF NOT EXISTS outputs (
+                guild text,
+                channel text,
+                server text,
+                last_updated CHARACTER(20),
+                storage_id INTEGER unique
+                );""")
+    await db.commit()
     # c.execute("""CREATE TABLE IF NOT EXISTS alliances (
     #         updated_at CHARACTER(20),
     #         name TEXT,
