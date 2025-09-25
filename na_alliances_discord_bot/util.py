@@ -14,8 +14,10 @@ async def get_channels(bot, config):
     channels = []
     for guild in bot.guilds:
         log.info(f'looking for {guild}')
+        if guild.name not in config:
+            continue
         for channel in await guild.fetch_channels():
-            # log.info(f'looking in {guild} at {channel.name} against {config[guild.name]}')
+            log.info(f'looking in {guild} at {channel.name} against {config[guild.name]}')
             if channel.name in config[guild.name]:
                 log.debug('append channel')
                 channels.append(channel)
