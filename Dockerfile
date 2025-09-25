@@ -1,5 +1,6 @@
 FROM python:3-trixie
 RUN apt update && apt install -y python3-poetry
+WORKDIR /venvs
 VOLUME /alliancebot
 WORKDIR /alliancebot
 RUN --mount=type=bind,target=/alliancebot,src=. poetry install
