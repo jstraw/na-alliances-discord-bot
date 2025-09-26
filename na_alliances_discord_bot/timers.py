@@ -77,9 +77,9 @@ class UpdateSheet(commands.Cog):
         to_add = new - old
         to_remove = old - new
         for x in list(to_add):
-            ret.append(added.format(guild=x))
+            ret.append(added.format(guild=x, alliance=alliance))
         for x in list(to_remove):
-            ret.append(removed.format(guild=x))
+            ret.append(removed.format(guild=x, alliance=alliance))
         return ret
 
     async def write_update(self, data, now):
@@ -141,6 +141,8 @@ class UpdateSheet(commands.Cog):
                         old_server = [x for x in o.keys() if o[x] == True][0]
                         if new_server != old_server:
                             alliance_changes.append(f"Moved: {bot.config[old_server]} => {bot.config[new_server]}")
+                        if len(alliance_changes) == 1:
+                            alliance_changes.append(f"(Notes) {n['Notes:']}")
                         changelog.append(f"* {' '.join(alliance_changes)}")
                     break
         log.debug(changelog)
