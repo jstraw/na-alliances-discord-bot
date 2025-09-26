@@ -128,8 +128,8 @@ class UpdateSheet(commands.Cog):
                         logging.debug(f'Changes to {n['Alliance:']} detected')
                         alliance_changes = [f"Changes to {n['Alliance:']}: "]
                         if n['Guilds'] != o['Guilds']:
-                            new_guilds = set(n['Guilds'].split('\n'))
-                            old_guilds = set(o['Guilds'].split('\n'))
+                            new_guilds = set(n['Guilds'].strip().split('\n'))
+                            old_guilds = set(o['Guilds'].strip().split('\n'))
                             alliance_changes.extend(self.added_or_removed(
                                 new_guilds,
                                 old_guilds,
