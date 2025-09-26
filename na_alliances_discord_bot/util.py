@@ -24,6 +24,7 @@ async def get_channels(bot, config):
     log.warning(f"returning {channels}")
     return channels
 
+
 async def db_connection(config):
     db = await aiosqlite.connect(config['db'])
     await db.execute("""CREATE TABLE IF NOT EXISTS messages (

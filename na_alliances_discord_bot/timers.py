@@ -174,21 +174,22 @@ class UpdateSheet(commands.Cog):
                         if len(new_server) and len(old_server):
                             changelog.append(f"* Changes to {n['Solo Guilds']}: {old_server} => {new_server}")
         
+        changelog_channels = await util.get_channels(self.bot, self.config['changelog_channels'])
         # Output
         if not changelog:
             log.warning("No Changes")
             return
         elif len(changelog) < 100:
             log.warning("Smallish Changes")
-            await self.storage_channel.send('\n'.join(changelog))
+            for channel in changelog_channels:
+                await channel.send('\n'.join(changelog))
             log.debug("Sent")
         else:
             log.warning("Large Changes")
-            await self.storage_channel.send("Large Changelog", file=io.StringIO('\n'.join(changelog)))
+            for channel in changelog_channels:
+                await channel.send("Large Changelog", file=io.StringIO('\n'.join(changelog)))
             log.debug("Sent")
         await self.write_update(newdata, now)
-        self.json_data = newdata
-        self.last_updated = now
         await self.push_embeds()
 
     @check_for_updates.before_loop
