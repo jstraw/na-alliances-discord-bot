@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import io
 import json
@@ -26,10 +27,12 @@ class UpdateSheet(commands.Cog):
         self.config = bot.config
         super().__init__()
 
-    @discord.app_commands.command(name="update_embeds")
+    @discord.app_commands.command(name="update_embeds", description="Install Embeds/Update Embeds on all servers")
+    @discord.app_commands.check(util.has_role)
     async def update(self, interaction: discord.Interaction):
         await interaction.response.send_message(f"Pushing Embeds")
         await self.push_embeds()
+        await interaction.edit_original_response(content="Completed Pushing Embeds")
         
 
         
@@ -71,7 +74,7 @@ class UpdateSheet(commands.Cog):
         self.check_for_updates.start()
 
 
-    def added_or_removed(self, new, old, added, removed, alliance=None):
+    def added_or_removed(self, new: set, old: set, added: str, removed: str, alliance=None):
         logging.getLogger("timers.added_or_removed").debug(f"Generating changes {added}/{removed}")
         ret = []
         to_add = new - old
@@ -82,7 +85,7 @@ class UpdateSheet(commands.Cog):
             ret.append(removed.format(guild=x, alliance=alliance))
         return ret
 
-    async def write_update(self, data, now):
+    async def write_update(self, data: dict, now: datetime.datetime):
         self.last_updated = now
         self.json_data = data
         await self.current_data.edit(
@@ -194,11 +197,13 @@ class UpdateSheet(commands.Cog):
 
     @check_for_updates.before_loop
     async def before_check_for_updates(self):
-        logging.info("Waiting to start update check")
+        log = logging.getLogger("timers.before_check_for_updates")
+        log.info("Waiting to start update check")
         await self.bot.wait_until_ready()
-        logging.info("Start update check")
+        log.info("Start update check")
 
     async def push_embeds(self):
+        log = logging.getLogger("timers.push_embeds")
         channels = await util.get_channels(self.bot, self.config['channels'])
         servers = {}
         for channel in channels:
@@ -223,10 +228,11 @@ class UpdateSheet(commands.Cog):
                                             '{message.id}');""")
                     await self.db.commit()
                 else:
-                    logging.debug(f"row: {rows}")
+                    log.debug(f"row: {rows}")
                     g, c, s, lu, mid = rows[0]
                     message = await channel.fetch_message(mid)
                 await message.edit(content=f'# {name} Guild List', embeds=msg_embed)
-                await self.db.execute(f"""UPDATE outputs set last_updated = '{self.last_updated}' where storage_id = {mid}""")
+                await self.db.execute(f"""UPDATE outputs set last_updated = '{self.last_updated}' where storage_id = {message.id}""")
                 await self.db.commit()
+                await asyncio.sleep(1.01)
                     

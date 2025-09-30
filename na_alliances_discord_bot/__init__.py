@@ -9,11 +9,8 @@ global configs
 ### Configure Logging
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
-logging.getLogger('discord.http').setLevel(logging.INFO)
-logging.getLogger('asyncio').setLevel(logging.INFO)
 logging.getLogger('aiohttp').setLevel(logging.DEBUG)
-logging.getLogger('aiosqlite').setLevel(logging.INFO)
-logging.getLogger('na_alliances_discord_bot.naspreadsheet').setLevel(logging.INFO)
+
 
 handler = logging.handlers.RotatingFileHandler(
     filename='discord.log',
@@ -25,9 +22,9 @@ console = logging.StreamHandler()
 dt_fmt = '%Y-%m-%d %H:%M:%S'
 formatter = logging.Formatter('[{asctime}] [{levelname:<8}] {name}: {message}', dt_fmt, style='{')
 console.setFormatter(formatter)
-handler.setFormatter(formatter)
+#handler.setFormatter(formatter)
 # logger.addHandler(handler)
-logger.addHandler(console)
+#logger.addHandler(console)
 
 
 if __name__ == '__main__':
@@ -36,8 +33,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
     with open(args.config, 'r') as fd:
         config = json.load(fd)
+    for x in config['info_loggers']:
+        logging.getLogger(x).setLevel(logging.INFO)
 
     
     client.bot.config = config
-    client.bot.run(config['token'])
+    client.bot.run(config['token'], log_handler=console, root_logger=True, log_level=logging.DEBUG)
     logger.warning("Shutting Down")
