@@ -36,6 +36,17 @@ async def sync(interaction: discord.Integration):
     else:
         await interaction.response.send_message("Permisson Denied")
 
+@bot.event
+async def on_message(message: discord.Message):
+    log = logging.getLogger("bot.on_message")
+    log.debug(f"was sent: {message}")
+    if message.content == '#sync#' and message.author.id in bot.config['allowed_admins'].values():
+        log.info(f"Sync Requested by DM by {message.author}")
+        for x, y in bot.cogs.items():
+            await y.bot.tree.sync()
+        await bot.tree.sync()
+        await message.reply("Synced.")
+        
 
 @bot.event
 async def on_ready():
