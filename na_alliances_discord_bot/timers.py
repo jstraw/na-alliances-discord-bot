@@ -202,7 +202,7 @@ class UpdateSheet(commands.Cog):
         if not changelog:
             log.warning("No Changes")
             return
-        elif len(changelog) < 100:
+        elif len(changelog) < 25:
             log.warning("Smallish Changes")
             for channel in changelog_channels:
                 await channel.send('\n'.join(changelog))
