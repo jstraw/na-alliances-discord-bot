@@ -1,4 +1,4 @@
-# import json
+"""Bot definition"""
 import logging
 
 import discord
@@ -9,6 +9,7 @@ from na_alliances_discord_bot.timers import UpdateSheet
 from na_alliances_discord_bot.channels import ManageChannels
 
 class AlliancesBot(discord.ext.commands.Bot):
+    """Bot Class"""
     def __init__(self, command_prefix, intents: discord.Intents):
         super().__init__(command_prefix, intents=intents)
         self.logger = logging.getLogger("alliancesBot")
@@ -24,6 +25,13 @@ bot = AlliancesBot(
 @bot.tree.command(name="sync",
                   description="Admin Only: Resync commands")
 async def sync(interaction: discord.Integration):
+    """
+    Sync Commands to Discord.
+    
+    If you want to use / commands, you need a sync, but you don't want to 
+    push a sync every time you load, so you make it a command.
+    
+    :param interaction: Information about the request (and response)"""
     if interaction.user.id in bot.config['allowed_admins'].values():
         await interaction.response.send_message("Syncing commands")
         for _, y in bot.cogs.items():
@@ -35,6 +43,14 @@ async def sync(interaction: discord.Integration):
 
 @bot.event
 async def on_message(message: discord.Message):
+    """
+    Sync Commands to Discord.
+    
+    If you want to use / commands, you need a sync, but you don't want to 
+    push a sync every time you load, so you make it a command.
+
+    :param message: The message being sent
+    """
     log = logging.getLogger("bot.on_message")
     log.debug("was sent: %s", message)
     if message.content == '#sync#' and message.author.id in bot.config['allowed_admins'].values():
@@ -43,13 +59,13 @@ async def on_message(message: discord.Message):
             await y.bot.tree.sync()
         await bot.tree.sync()
         await message.reply("Synced.")
-        
+
 
 @bot.event
 async def on_ready():
+    """Bot is online and ready to work (configure commands now!)"""
     bot.session = LoggingClientSession('https://worldvs.world/alliances/')  # pylint: disable=W0201
     bot.logger.info("Logged on as %s to %s", bot.user, bot.guilds)
     await bot.add_cog(UpdateSheet(bot))
     await bot.add_cog(ManageChannels(bot))
     bot.logger.warning("Cogs %s", bot.cogs)
-        

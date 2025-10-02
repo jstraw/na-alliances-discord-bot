@@ -1,3 +1,4 @@
+"""Bot Entrypoint"""
 import argparse
 import json
 import logging

@@ -1,8 +1,14 @@
+"""Model for neven's google spreadsheet"""
 import logging
+from typing import Union
 
 import gspread
 
 class NAGuildSpreadSheet:
+    """neven's google spreadsheet
+    
+    :param client: Google API connector
+    :param spreadsheet_url: access url/key for spreadsheet"""
     def __init__(self,
                  client: gspread.Client,
                  spreadsheet_url: str):
@@ -13,7 +19,9 @@ class NAGuildSpreadSheet:
         else:
             self.sheet = client.open_by_key(spreadsheet_url)
 
-    def convert_boolean(self, var: str) -> bool:
+    def convert_boolean(self, var: str) -> Union[bool,str]:
+        """
+        Convert gspread's truthy and falsey values to python bool"""
         if var == "TRUE":
             return True
         elif var == "FALSE":
@@ -22,6 +30,9 @@ class NAGuildSpreadSheet:
             return var
 
     def get_sheet_data(self) -> dict:
+        """
+        Go out to google and get data from the Alliances and SoloGuilds sheets
+        """
         self.logger.info("Getting Spreadsheet Data")
         data = {}
         for ws in self.sheet.worksheets():

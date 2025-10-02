@@ -1,3 +1,4 @@
+"""Configure timers for updating from neven's spreadsheet"""
 import asyncio
 import datetime
 import io
@@ -13,14 +14,18 @@ import na_alliances_discord_bot.util as util
 
 
 class UpdateSheet(commands.Cog):
-    # self.db => sqlite database
-    # self.storage_channel => channel with the full data/update time
-    # self.storage_message => message id of the stored data
-    # self.current_data => message with the data (from self.storage_message)
-    # self.last_updated => timestamp of last update datetime.datetime
-    # self.json_data => actual stored data
-    # self.gspread => google spreadsheet connector
-    # self.sheet => internal interface for getting data from spreadsheet
+    """Command Cog for updating neven's spreadsheet
+    
+    
+    self.db => sqlite database
+    self.storage_channel => channel with the full data/update time
+    self.storage_message => message id of the stored data
+    self.current_data => message with the data (from self.storage_message)
+    self.last_updated => timestamp of last update datetime.datetime
+    self.json_data => actual stored data
+    self.gspread => google spreadsheet connector
+    self.sheet => internal interface for getting data from spreadsheet
+    """
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
         self.config = bot.config
@@ -31,6 +36,7 @@ class UpdateSheet(commands.Cog):
             description="Install Embeds/Update Embeds on all servers")
     @discord.app_commands.check(util.has_role)
     async def update(self, interaction: discord.Interaction):
+        """Force update Embeds on all servers"""
         await interaction.response.send_message("Pushing Embeds")
         await self.push_embeds()
         await interaction.edit_original_response(content="Completed Pushing Embeds")
@@ -38,9 +44,11 @@ class UpdateSheet(commands.Cog):
 
 
     async def cog_unload(self):
+        """End Timers on unload"""
         self.check_for_updates.cancel()
 
     async def cog_load(self):
+        """Configure the cog on startup"""
         log = logging.getLogger(__name__)
         self.db = await util.db_connection(self.config)
         log.debug("DB Connection online")
@@ -81,6 +89,13 @@ class UpdateSheet(commands.Cog):
 
 
     def added_or_removed(self, new: set, old: set, added: str, removed: str, alliance=None):
+        """Internal helper for tracking added/removed guilds
+        
+        :param new: The updated set (just pulled)
+        :param old: The original set (from the data.json)
+        :param added: String to use to format an added entry
+        :param removed: String to use to format a removed entry
+        :returns: a list of the added/removed changes"""
         logging.getLogger("timers.added_or_removed").debug(
             "Generating changes %s/%s", added, removed)
         ret = []
@@ -93,6 +108,10 @@ class UpdateSheet(commands.Cog):
         return ret
 
     async def write_update(self, data: dict, now: datetime.datetime):
+        """Write out the update to discord storage
+        
+        :param data: json data to store
+        :param now: the timestamp of the data pull"""
         self.last_updated = now
         self.json_data = data
         await self.current_data.edit(
@@ -108,6 +127,7 @@ class UpdateSheet(commands.Cog):
 
     @tasks.loop(minutes=5)
     async def check_for_updates(self):
+        """Actual Timer function for updating sheet"""
         log = logging.getLogger("timer.UpdateSheet.check_for_updates")
         log.info("Starting Sheet Update")
         now = datetime.datetime.now().isoformat()
@@ -158,7 +178,8 @@ class UpdateSheet(commands.Cog):
                         elif old_server == []:
                             alliance_changes.append(f"Now on: {servers[new_server[0]]}")
                         elif new_server[0] != old_server[0]:
-                            alliance_changes.append(f"Moved: {servers[old_server[0]]} => {servers[new_server[0]]}")
+                            alliance_changes.append(
+                                f"Moved: {servers[old_server[0]]} => {servers[new_server[0]]}")
                         if len(alliance_changes) == 1:
                             alliance_changes.append(f"(Notes) {n['Notes:']}")
                         changelog.append(f"* {' '.join(alliance_changes)}")
@@ -220,12 +241,16 @@ class UpdateSheet(commands.Cog):
 
     @check_for_updates.before_loop
     async def before_check_for_updates(self):
+        """Before running the update loop code
+        
+        Ensures that the bot is ready before doing anything"""
         log = logging.getLogger("timers.before_check_for_updates")
         log.info("Waiting to start update check")
         await self.bot.wait_until_ready()
         log.info("Start update check")
 
     async def push_embeds(self):
+        """Push new data to all configured outputs"""
         log = logging.getLogger("timers.push_embeds")
         channels = await util.get_channels(self.bot, self.config['channels'])
         servers = {}

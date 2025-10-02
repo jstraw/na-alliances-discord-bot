@@ -1,7 +1,18 @@
+
+"""Server Embed helper
+
+Maybe merge into util?"""
 import logging
 import discord
 
 def make_server_embed(content, server):
+    """
+    Create a discord.Embed for alliances and guilds
+
+    :param content: The json data to generate embeds from
+    :param server: The server key to look in the data for
+    :returns: A tuple of the embeds to add to a message
+    """
     log = logging.getLogger(__name__)
     log.info("Creating Server Embed for %s with %s Alliances and %s Guilds",
              server, len(content['Alliances']), len(content['SoloGuilds']))
