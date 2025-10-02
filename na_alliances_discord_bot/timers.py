@@ -165,8 +165,8 @@ class UpdateSheet(commands.Cog):
                             alliance_changes.extend(self.added_or_removed(
                                 new_guilds,
                                 old_guilds,
-                                "Joined: {guild}",
-                                "Left: {guild}",
+                                "  * Joined: {guild}",
+                                "  * Left: {guild}",
                                 alliance = n['Alliance:']
                             ))
                         log.debug("new: %s -- old: %s", n, o)
@@ -174,15 +174,15 @@ class UpdateSheet(commands.Cog):
                         old_server = [x for x in o.keys() if o[x] is True]
                         servers = self.config['servers']
                         if new_server == []:
-                            alliance_changes.append("No Server?")
+                            alliance_changes.append("  * No Server?")
                         elif old_server == []:
-                            alliance_changes.append(f"Now on: {servers[new_server[0]]}")
+                            alliance_changes.append(f"  * Now on: {servers[new_server[0]]}")
                         elif new_server[0] != old_server[0]:
                             alliance_changes.append(
-                                f"Moved: {servers[old_server[0]]} => {servers[new_server[0]]}")
+                                f"  * Moved: {servers[old_server[0]]} => {servers[new_server[0]]}")
                         if len(alliance_changes) == 1:
-                            alliance_changes.append(f"(Notes) {n['Notes:']}")
-                        changelog.append(f"\n  * {' '.join(alliance_changes)}")
+                            alliance_changes.append(f" * Notes: {n['Notes:']}")
+                        changelog.append(f"\n* {'\n'.join(alliance_changes)}")
                     break
         log.debug(changelog)
 
