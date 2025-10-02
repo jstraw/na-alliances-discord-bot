@@ -5,7 +5,6 @@ import logging.handlers
 
 import na_alliances_discord_bot.client as client
 
-global configs
 ### Configure Logging
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)

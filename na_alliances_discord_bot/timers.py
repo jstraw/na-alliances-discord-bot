@@ -152,10 +152,12 @@ class UpdateSheet(commands.Cog):
                         log.debug("new: %s -- old: %s", n, o)
                         new_server = [x for x in n.keys() if n[x] is True]
                         old_server = [x for x in o.keys() if o[x] is True]
-                        if len(new_server) == []:
+                        servers = self.config['servers']
+                        if new_server == []:
                             alliance_changes.append("No Server?")
+                        elif old_server == []:
+                            alliance_changes.append(f"Now on: {servers[new_server[0]]}")
                         elif new_server[0] != old_server[0]:
-                            servers = self.config['servers']
                             alliance_changes.append(f"Moved: {servers[old_server[0]]} => {servers[new_server[0]]}")
                         if len(alliance_changes) == 1:
                             alliance_changes.append(f"(Notes) {n['Notes:']}")
