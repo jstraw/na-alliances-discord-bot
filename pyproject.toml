@@ -17,3 +17,8 @@ gspread = "^6.2.1"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pylint."messages control"]
+disable = [
+    "attribute-defined-outside-init",
+]

@@ -3,7 +3,7 @@ import json
 import logging
 import logging.handlers
 
-import client
+import na_alliances_discord_bot.client as client
 
 global configs
 ### Configure Logging
@@ -19,8 +19,8 @@ handler = logging.handlers.RotatingFileHandler(
     backupCount=5,  # Rotate through 5 files
 )
 console = logging.StreamHandler()
-dt_fmt = '%Y-%m-%d %H:%M:%S'
-formatter = logging.Formatter('[{asctime}] [{levelname:<8}] {name}: {message}', dt_fmt, style='{')
+DT_FMT = '%Y-%m-%d %H:%M:%S'
+formatter = logging.Formatter('[{asctime}] [{levelname:<8}] {name}: {message}', DT_FMT, style='{')
 console.setFormatter(formatter)
 #handler.setFormatter(formatter)
 # logger.addHandler(handler)
@@ -31,12 +31,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', default='config.json', required=False)
     args = parser.parse_args()
-    with open(args.config, 'r') as fd:
+    with open(args.config, 'r', encoding="UTF-8") as fd:
         config = json.load(fd)
     for x in config['info_loggers']:
         logging.getLogger(x).setLevel(logging.INFO)
 
-    
+
     client.bot.config = config
     client.bot.run(config['token'], log_handler=console, root_logger=True, log_level=logging.DEBUG)
     logger.warning("Shutting Down")

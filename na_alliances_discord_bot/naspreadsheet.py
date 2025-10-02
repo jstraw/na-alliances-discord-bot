@@ -1,10 +1,6 @@
-import json
 import logging
 
-import aiohttp
 import gspread
-
-from util import LoggingClientSession
 
 class NAGuildSpreadSheet:
     def __init__(self,
@@ -16,7 +12,7 @@ class NAGuildSpreadSheet:
             self.sheet = client.open_by_url(spreadsheet_url)
         else:
             self.sheet = client.open_by_key(spreadsheet_url)
-        
+
     def convert_boolean(self, var: str) -> bool:
         if var == "TRUE":
             return True
@@ -31,7 +27,7 @@ class NAGuildSpreadSheet:
         for ws in self.sheet.worksheets():
             if ws.title not in ["Alliances", "SoloGuilds"]:
                 continue
-            self.logger.debug(f"Requesting data for worksheet: {ws.title}")
+            self.logger.debug("Requesting data for worksheet: %s", ws.title)
             name = ws.title
             self.logger.debug(ws.get("A1:V1"))
             try:
@@ -39,8 +35,8 @@ class NAGuildSpreadSheet:
                 out = []
                 headers = d[0]
                 for r in d[1:]:
-                    if '[' not in r[0]: 
-                        self.logger.debug(f"ignoring {r}")
+                    if '[' not in r[0]:
+                        self.logger.debug("ignoring %s", r)
                         continue
                     row = [self.convert_boolean(x) for x in r]
                     out.append(dict(zip(headers, row)))

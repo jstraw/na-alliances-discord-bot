@@ -1,10 +1,7 @@
-import datetime
-import io
-import json
 import logging
 
 import discord
-from discord.ext import tasks, commands
+from discord.ext import commands
 import na_alliances_discord_bot.util as util
 
 
@@ -18,7 +15,8 @@ class ManageChannels(commands.Cog):
         log = logging.getLogger("channels.ManageChannels")
         log.info("Manage Channel cog online")
 
-    async def manage_team_channels(self, channel_filter: list[str], perms: discord.PermissionOverwrite,
+    async def manage_team_channels(self, channel_filter: list[str],
+                                   perms: discord.PermissionOverwrite,
                                    regenerate=False):
         log = logging.getLogger("channels.ManageChannels.manage_team_channels")
         channels = []
@@ -35,19 +33,25 @@ class ManageChannels(commands.Cog):
             if regenerate:
                 log.debug(f"regenerating {channel.name}")
                 await channel.edit(name=f"{channel.name}-rename")
-                await channel.clone(name=channel.name, category=channel.category,
+                await channel.clone(name=channel.name,
+                                    category=channel.category,
                                     reason="Rebuilding Team Channels")
                 await channel.delete()
         for category in list(categories):
-            log.debug(f"{category.name} - {[x.name for x in channel.guiild.roles]}")
+            log.debug(
+                f"{category.name} - {[x.name for x in channel.guild.roles]}")
             role = discord.utils.get(channel.guild.roles, name=category.name)
+            category.set_permissions(role, overwrite=perms)
             for cat_channel in category.channels:
                 if any(x for x in channel_filter if x in cat_channel.name):
-                    log.info(f"Change perms on {cat_channel.name} for {role.name}")
+                    log.info(
+                        f"Change perms on {cat_channel.name} for {role.name}")
                     await cat_channel.set_permissions(role, overwrite=perms)
         return channels
 
-    @discord.app_commands.command(name="lock_team_channels", description="Lock Out NA Alliance Server Team Channels")
+    @discord.app_commands.command(
+            name="lock_team_channels",
+            description="Lock Out NA Alliance Server Team Channels")
     @discord.app_commands.check(util.has_role)
     async def lock_team_channels(self, interaction: discord.Interaction):
         log = logging.getLogger("channels.ManageChannels.lock_team_channels")
@@ -60,11 +64,14 @@ class ManageChannels(commands.Cog):
             "-raid-alerts",
             "-schedules",
         ]
-        channels = await self.manage_team_channels(channel_filter, perms, regenerate=True)
+        await self.manage_team_channels(channel_filter, perms, regenerate=True)
         log.info("Locking Team Channels Complete")
-        await interaction.edit_original_response(content="Locking Team Channels... Complete")
+        await interaction.edit_original_response(
+                content="Locking Team Channels... Complete")
 
-    @discord.app_commands.command(name="lock_reset_channels", description="Lock NA Alliance Reset Channels for all teams")
+    @discord.app_commands.command(
+            name="lock_reset_channels",
+            description="Lock NA Alliance Reset Channels for all teams")
     @discord.app_commands.check(util.has_role)
     async def lock_reset_channels(self, interaction: discord.Interaction):
         log = logging.getLogger("channels.ManageChannels.lock_reset_channels")
@@ -73,12 +80,14 @@ class ManageChannels(commands.Cog):
         perms = discord.PermissionOverwrite()
         perms.view_channel = False
         channel_filter = ['-reset']
-        channels = await self.manage_team_channels(channel_filter, perms)
+        await self.manage_team_channels(channel_filter, perms)
         log.info("Locking Reset Channels Complete")
-        await interaction.edit_original_response(content="Locking Reset Channels... Complete")
+        await interaction.edit_original_response(
+                content="Locking Reset Channels... Complete")
 
-
-    @discord.app_commands.command(name="unlock_team_channels", description="Unlock NA Alliance Team Channels (including Reset)")
+    @discord.app_commands.command(
+            name="unlock_team_channels",
+            description="Unlock NA Alliance Team Channels (including Reset)")
     @discord.app_commands.check(util.has_role)
     async def unlock_team_channels(self, interaction: discord.Interaction):
         log = logging.getLogger("channels.ManageChannels.unlock_team_channels")
@@ -94,4 +103,5 @@ class ManageChannels(commands.Cog):
         ]
         await self.manage_team_channels(channel_filter, perms)
         log.info("Unlocking Channels Complete")
-        await interaction.edit_original_response(content="Unlocking Team Channels... Complete")
+        await interaction.edit_original_response(
+                content="Unlocking Team Channels... Complete")
