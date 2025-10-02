@@ -135,7 +135,7 @@ class UpdateSheet(commands.Cog):
         if self.json_data == {}:
             await self.write_update(newdata, now)
             return
-        changelog = []
+        changelog = ["### Alliance Changes"]
         #
         # Determine what alliances are new/gone
         new_alliances = [x['Alliance:'] for x in newdata['Alliances']]
@@ -165,8 +165,8 @@ class UpdateSheet(commands.Cog):
                             alliance_changes.extend(self.added_or_removed(
                                 new_guilds,
                                 old_guilds,
-                                "Joined {alliance}: {guild}",
-                                "Left {alliance}: {guild}",
+                                "Joined: {guild}",
+                                "Left: {guild}",
                                 alliance = n['Alliance:']
                             ))
                         log.debug("new: %s -- old: %s", n, o)
@@ -182,9 +182,11 @@ class UpdateSheet(commands.Cog):
                                 f"Moved: {servers[old_server[0]]} => {servers[new_server[0]]}")
                         if len(alliance_changes) == 1:
                             alliance_changes.append(f"(Notes) {n['Notes:']}")
-                        changelog.append(f"* {' '.join(alliance_changes)}")
+                        changelog.append(f"\n  * {' '.join(alliance_changes)}")
                     break
         log.debug(changelog)
+
+        changelog.append("### Solo Guild Changes")
         #
         # Determine Guild Movements
         new_guilds = set([x['Solo Guilds'] for x in newdata['SoloGuilds']])
@@ -220,10 +222,10 @@ class UpdateSheet(commands.Cog):
 
         changelog_channels = await util.get_channels(self.bot, self.config['changelog_channels'])
         # Output
-        if not changelog:
+        if len(changelog) == 2:
             log.warning("No Changes")
             return
-        elif len(changelog) < 25:
+        elif len(changelog) < 30:
             log.warning("Smallish Changes")
             for channel in changelog_channels:
                 await channel.send('\n'.join(changelog))
