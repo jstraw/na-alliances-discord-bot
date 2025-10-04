@@ -131,7 +131,11 @@ class UpdateSheet(commands.Cog):
         log = logging.getLogger("timer.UpdateSheet.check_for_updates")
         log.info("Starting Sheet Update")
         now = datetime.datetime.now().isoformat()
-        newdata = self.sheet.get_sheet_data()
+        try:
+            newdata = self.sheet.get_sheet_data()
+        except gspread.exceptions.APIError as e:
+            log.exception("Error from gspread", exc_info=e)
+            return None
         if self.json_data == {}:
             await self.write_update(newdata, now)
             return
