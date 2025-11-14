@@ -24,6 +24,8 @@ bot = AlliancesBot(
 
 @bot.tree.command(name="sync",
                   description="Admin Only: Resync commands")
+@discord.app_commands.default_permissions(ban_members=True)
+@discord.app_commands.checks.has_role("Admin")
 async def sync(interaction: discord.Integration):
     """
     Sync Commands to Discord.
