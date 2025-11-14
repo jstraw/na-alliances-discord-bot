@@ -29,12 +29,15 @@ class UpdateSheet(commands.Cog):
     def __init__(self, bot: discord.ext.commands.Bot):
         self.bot = bot
         self.config = bot.config
+        self.reset_dates = [datetime.datetime.fromisoformat(x) 
+                            for x in self.config['reset_dates']]
         super().__init__()
 
     @discord.app_commands.command(
             name="update_embeds",
             description="Install Embeds/Update Embeds on all servers")
-    @discord.app_commands.check(util.has_role)
+    @discord.app_commands.default_permissions(ban_members=True)
+    @discord.app_commands.checks.has_role("Admin")
     async def update(self, interaction: discord.Interaction):
         """Force update Embeds on all servers"""
         await interaction.response.send_message("Pushing Embeds")
@@ -124,6 +127,63 @@ class UpdateSheet(commands.Cog):
                               last_updated = "{now}",
                               storage_id = {self.storage_message}''')
         await self.db.commit()
+
+    @tasks.loop(time=datetime.time(17, 0, 0, tzinfo=datetime.timezone.utc))
+    async def do_onepm_lock(self):
+        now = datetime.datetime.now(datetime.timezone.utc)
+        now.replace(second=0, minute=0, microsecond=0)
+        if now + datetime.timedelta(days=4, hours=9) in self.reset_dates:
+            # Lock Reset Channels
+            msg = self.storage_channel.send("Locking Reset Channels")
+            perms = discord.PermissionOverwrite()
+            perms.view_channel = False
+            channel_filter = ['-reset']
+            await self.bot.get_cog('ManageChannels').manage_team_channels(
+                channel_filter,
+                perms
+            )
+            msg.edit("Locking Reset Channels... Complete")
+        elif now + datetime.timedelta(hours=9) in self.reset_dates:
+            # Unlock channels
+            
+            msg = self.storage_channel.send("Unlocking Channels")
+            perms = discord.PermissionOverwrite()
+            perms.view_channel = True
+            channel_filter = [
+                "-general",
+                "-raid-alerts",
+                "-schedules",
+                "-reset",
+            ]
+            await self.bot.get_cog('ManageChannels').manage_team_channels(
+                channel_filter,
+                perms
+            )
+            msg.edit("Unlocking Channels... Complete")
+        
+
+    @tasks.loop(time=datetime.time(8, 0 ,0, tzinfo=datetime.timezone.utc))
+    async def do_fouram_lock(self):
+        now = datetime.datetime.now(datetime.timezone.utc)
+        now.replace(second=0, minute=0, microsecond=0)
+        # Thursday 4 am to Friday 10pm (converted to utc) is 42 hours
+        if now + datetime.timedelta(hours=42) in self.reset_dates:
+            # lock team channels
+            msg = self.storage_channel.send("Locking Team Channels")
+            perms = discord.PermissionOverwrite()
+            perms.view_channel = False
+            channel_filter = [
+                "-general",
+                "-raid-alerts",
+                "-schedules",
+            ]
+            await self.bot.get_cog('ManageChannels').manage_team_channels(
+                channel_filter,
+                perms,
+                regenerate=True
+            )
+            msg.edit("Locking Reset Channels... Complete")
+
 
     @tasks.loop(minutes=5)
     async def check_for_updates(self):

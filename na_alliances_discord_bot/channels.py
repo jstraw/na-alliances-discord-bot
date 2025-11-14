@@ -70,7 +70,8 @@ class ManageChannels(commands.Cog):
     @discord.app_commands.command(
             name="lock_team_channels",
             description="Lock Out NA Alliance Server Team Channels")
-    @discord.app_commands.check(util.has_role)
+    @discord.app_commands.default_permissions(ban_members=True)
+    @discord.app_commands.checks.has_role("Admin")
     async def lock_team_channels(self, interaction: discord.Interaction):
         """Lock out team channels"""
         log = logging.getLogger("channels.ManageChannels.lock_team_channels")
@@ -91,7 +92,8 @@ class ManageChannels(commands.Cog):
     @discord.app_commands.command(
             name="lock_reset_channels",
             description="Lock NA Alliance Reset Channels for all teams")
-    @discord.app_commands.check(util.has_role)
+    @discord.app_commands.default_permissions(ban_members=True)
+    @discord.app_commands.checks.has_role("Admin")
     async def lock_reset_channels(self, interaction: discord.Interaction):
         """Lock the Reset Team Channels"""
         log = logging.getLogger("channels.ManageChannels.lock_reset_channels")
@@ -108,7 +110,8 @@ class ManageChannels(commands.Cog):
     @discord.app_commands.command(
             name="unlock_team_channels",
             description="Unlock NA Alliance Team Channels (including Reset)")
-    @discord.app_commands.check(util.has_role)
+    @discord.app_commands.default_permissions(ban_members=True)
+    @discord.app_commands.checks.has_role("Admin")
     async def unlock_team_channels(self, interaction: discord.Interaction):
         """Unlock all Team Channels"""
         log = logging.getLogger("channels.ManageChannels.unlock_team_channels")
