@@ -7,6 +7,7 @@ import discord.ext.commands
 from na_alliances_discord_bot.util import LoggingClientSession
 from na_alliances_discord_bot.timers import UpdateSheet
 from na_alliances_discord_bot.channels import ManageChannels
+from na_alliances_discord_bot.copypasta import copyPasta
 
 class AlliancesBot(discord.ext.commands.Bot):
     """Bot Class"""
@@ -70,4 +71,5 @@ async def on_ready():
     bot.logger.info("Logged on as %s to %s", bot.user, bot.guilds)
     await bot.add_cog(UpdateSheet(bot))
     await bot.add_cog(ManageChannels(bot))
+    await bot.add_cog(copyPasta(bot))
     bot.logger.warning("Cogs %s", bot.cogs)
