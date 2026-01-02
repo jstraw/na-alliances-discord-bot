@@ -32,7 +32,7 @@ class copyPasta(commands.Cog):
                                    gl: discord.Member = None):
         """Welcome a Guild Leader"""
         log = logging.getLogger("copypasta.copyPasta.welcome.gl")
-        log.info("Welcome Guild Leader")
+        log.info(f"Welcome Guild Leader {gl.name}")
         embed = discord.Embed(
             title="We've added your new role!",
             timestamp=discord.utils.utcnow(),
@@ -44,5 +44,28 @@ class copyPasta(commands.Cog):
             """
         )
         await interaction.response.send_message(f"Welcome {gl.mention or ""}",
+                                                embed=embed)
+        
+    @discord.app_commands.command(
+            name="welcome_commander",
+            description="Welcome a Commander")
+    @discord.app_commands.default_permissions(ban_members=True)
+    @discord.app_commands.checks.has_role("Admin")
+    async def welcome_commander(self, interaction: discord.Interaction,
+                                   cmdr: discord.Member = None):
+        """Welcome a Commander"""
+        log = logging.getLogger("copypasta.copyPasta.welcome.cmdr")
+        log.info(f"Welcome Commander {cmdr.name}")
+        embed = discord.Embed(
+            title="We've added your new role!",
+            timestamp=discord.utils.utcnow(),
+            description="""
+* Make sure that you have registered a **full** API key with Aleeva, to identify your current and upcoming World vs. World teams.
+* You can now send pings in your team channel using either the @ here or @ [teamname] command. Please ping responsibly.
+* You can now interact with the reset bot in your team channel, which goes live every Thursday around noon eastern. Let your other commanders and teammates know which map you'll be taking your squad to on Fridays, if you play during reset.
+* You can use your team-specific voice comms on this server, or you can link to your own Discord server for comms. You can drag users that have not completed API verification into your team-specific voice channels.
+            """
+        )
+        await interaction.response.send_message(f"Welcome {cmdr.mention or ""}",
                                                 embed=embed)
         
