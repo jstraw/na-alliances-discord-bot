@@ -48,7 +48,7 @@ if __name__ == '__main__':
     logger.warning("Shutting Down")
 
 @client.event
-async def on_error(event, *args, *kwargs):
+async def on_error(event, *args, **kwargs):
     async with aiohttp.ClientSession() as session:
         webhook = Webhook.from_url(config['alert_webhook'], session=session)
         ats = [f"<@{x}>" for k, x in config['allowed_admins']]
