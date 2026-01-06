@@ -55,7 +55,7 @@ async def on_error(event, *args, **kwargs):
 
         embed = Embed(timestamp=datetime.datetime.now(),
                       color="red",
-                      title="Traceback"
+                      title="Traceback",
                       description=f"```{traceback.format_exc()}```",
                       )
         embed.add_field("event", value=event)
