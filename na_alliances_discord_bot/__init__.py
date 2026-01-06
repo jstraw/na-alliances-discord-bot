@@ -47,7 +47,7 @@ if __name__ == '__main__':
     client.bot.run(config['token'], log_handler=console, root_logger=True, log_level=logging.DEBUG)
     logger.warning("Shutting Down")
 
-@client.event
+@client.bot.event
 async def on_error(event, *args, **kwargs):
     async with aiohttp.ClientSession() as session:
         webhook = Webhook.from_url(config['alert_webhook'], session=session)
