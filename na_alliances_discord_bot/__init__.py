@@ -1,10 +1,16 @@
 """Bot Entrypoint"""
 import argparse
+import datetime
 import json
 import logging
 import logging.handlers
+import traceback
+
+import aiohttp
+from discord import Webhook, Embed
 
 import na_alliances_discord_bot.client as client
+
 
 ### Configure Logging
 logger = logging.getLogger()
@@ -40,3 +46,21 @@ if __name__ == '__main__':
     client.bot.config = config
     client.bot.run(config['token'], log_handler=console, root_logger=True, log_level=logging.DEBUG)
     logger.warning("Shutting Down")
+
+@client.event
+async def on_error(event, *args, *kwargs):
+    async with aiohttp.ClientSession() as session:
+        webhook = Webhook.from_url(config['alert_webhook'], session=session)
+        ats = [f"<@{x}>" for k, x in config['allowed_admins']]
+
+        embed = Embed(timestamp=datetime.datetime.now(),
+                      color="red",
+                      title="Traceback"
+                      description=f"```{traceback.format_exc()}```",
+                      )
+        embed.add_field("event", value=event)
+        embed.add_field("args", value=str(args))
+        embed.add_field("kwargs", value=str(kwargs))
+        await webhook.send(' '.join(ats), 
+                           username='NA Alliances Alerts',
+                           embed=embed)
