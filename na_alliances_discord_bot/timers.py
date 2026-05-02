@@ -191,8 +191,9 @@ class UpdateSheet(commands.Cog):
         log = logging.getLogger("timer.UpdateSheet.check_for_updates")
         log.info("Starting Sheet Update")
         now = datetime.datetime.now().isoformat()
+        loop = asyncio.get_event_loop()
         try:
-            newdata = self.sheet.get_sheet_data()
+            newdata = loop.run_in_executor(None, self.sheet.get_sheet_data)
         except gspread.exceptions.APIError as e:
             log.exception("Error from gspread", exc_info=e)
             return None
