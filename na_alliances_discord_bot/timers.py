@@ -193,7 +193,8 @@ class UpdateSheet(commands.Cog):
         now = datetime.datetime.now().isoformat()
         loop = asyncio.get_event_loop()
         try:
-            newdata = loop.run_in_executor(None, self.sheet.get_sheet_data)
+            future = loop.run_in_executor(None, self.sheet.get_sheet_data)
+            newdata = await future.result()
         except gspread.exceptions.APIError as e:
             log.exception("Error from gspread", exc_info=e)
             return None
