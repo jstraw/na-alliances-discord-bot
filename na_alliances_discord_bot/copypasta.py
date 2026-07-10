@@ -1,6 +1,7 @@
 """Manage Channel view/hide and regeneration"""
 import logging
 
+import aiohttp
 import discord
 from discord.ext import commands
 import na_alliances_discord_bot.util as util
@@ -69,3 +70,33 @@ class copyPasta(commands.Cog):
         await interaction.response.send_message(f"Welcome {cmdr.mention or ""}",
                                                 embed=embed)
         
+    @discord.app_commands.command(
+            name="lockout_reminder",
+            description="Post a Reminder about Lockout to this channel")
+    @discord.app_commands.default_permissions(ban_members=True)
+    @discord.app_commands.checks.has_role("Admin")
+    async def lockout_reminder(self, interaction: discord.Integration,
+                               ping: discord.Role = None):
+        "Announce next Lockout date/time"
+        log = logging.getLogger("copypasta.copyPasta.lockout")
+        now = discord.utils.utcnow()
+        on = None
+        async with aiohttp.ClientSession() as sess:
+            async with session.get("https://api.guildwars2.com/v2/wvw/timers/lockout") as resp:
+                on = discord.utils.parse_time(await resp.json()['na'])
+        log.info(f"{interaction.user.name} Announcing lockout to {interaction.channel.guild}-{interaction.channel.name} for {on}")
+        embed = discord.Embed(
+            title="Upcoming NA Lockout",
+            timestamp=now,
+            description=f"""
+Hello {ping.mention}!
+
+Lockout is on {discord.utils.format_dt(on, 'F')} / {discord.utils.format_dt(on, 'R')}. 
+Please confirm your WvW guild by checking for the castle icon in the guild list.  If you need to update your guild:
+* In the guild tab, represent the guild you are choosing
+* Go to the World vs World window in game
+* Select the last tab on the left
+* Confirm the guild you want to represent is shown and click "Select Battle Guild"."""
+        )
+        await interaction.response.send_message("", embed=embed)
+    )
