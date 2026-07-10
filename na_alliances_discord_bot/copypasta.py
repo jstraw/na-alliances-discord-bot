@@ -82,7 +82,7 @@ class copyPasta(commands.Cog):
         now = discord.utils.utcnow()
         on = None
         async with aiohttp.ClientSession() as sess:
-            async with session.get("https://api.guildwars2.com/v2/wvw/timers/lockout") as resp:
+            async with sess.get("https://api.guildwars2.com/v2/wvw/timers/lockout") as resp:
                 on = discord.utils.parse_time(await resp.json()['na'])
         log.info(f"{interaction.user.name} Announcing lockout to {interaction.channel.guild}-{interaction.channel.name} for {on}")
         embed = discord.Embed(
