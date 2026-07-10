@@ -99,4 +99,3 @@ Please confirm your WvW guild by checking for the castle icon in the guild list.
 * Confirm the guild you want to represent is shown and click "Select Battle Guild"."""
         )
         await interaction.response.send_message("", embed=embed)
-    )
