@@ -89,6 +89,7 @@ class copyPasta(commands.Cog):
         embed = discord.Embed(
             title="Upcoming NA Lockout",
             timestamp=now,
+            color=6094906,
             description=f"""
 Lockout is on {discord.utils.format_dt(on, 'F')} / {discord.utils.format_dt(on, 'R')}. 
 Please confirm your WvW guild by checking for the castle icon in the guild list.  If you need to update your guild:
