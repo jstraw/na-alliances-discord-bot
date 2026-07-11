@@ -90,8 +90,6 @@ class copyPasta(commands.Cog):
             title="Upcoming NA Lockout",
             timestamp=now,
             description=f"""
-Hello {ping.mention}!
-
 Lockout is on {discord.utils.format_dt(on, 'F')} / {discord.utils.format_dt(on, 'R')}. 
 Please confirm your WvW guild by checking for the castle icon in the guild list.  If you need to update your guild:
 * In the guild tab, represent the guild you are choosing
@@ -99,4 +97,4 @@ Please confirm your WvW guild by checking for the castle icon in the guild list.
 * Select the last tab on the left
 * Confirm the guild you want to represent is shown and click "Select Battle Guild"."""
         )
-        await interaction.response.send_message("", embed=embed)
+        await interaction.response.send_message(f"Hello {ping.mention}!", embed=embed)
